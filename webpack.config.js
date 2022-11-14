@@ -5,8 +5,7 @@ const HtmlWebpackPlugin = require("html-webpack-plugin")
 const MiniCssExtractPlugin = require("mini-css-extract-plugin")
 const WebpackPwaManifest = require("webpack-pwa-manifest")
 const CopyWebpackPlugin = require("copy-webpack-plugin")
-const { InjectManifest } = require("workbox-webpack-plugin")
-const { browserslist } = require("./package.json")
+const { InjectManifest } = require("workbox-webpack-plugin") 
 const HTMLInlineCSSWebpackPlugin = require("html-inline-css-webpack-plugin").default
 
 module.exports = (env, options) => {
@@ -64,14 +63,14 @@ module.exports = (env, options) => {
 
     if (!options.watch) {
         plugins.push(new InjectManifest({
-            swSrc: "./src/serviceworker.js",
+            swSrc: "./src/serviceworker.ts",
             swDest: "serviceworker.js",
             exclude: ["serviceworker.js"],
         }))
     }
 
     return {
-        entry: { app: "./src/root.js" },
+        entry: { app: "./src/root.tsx" },
         output: {
             path: path.resolve(__dirname, "public"),
             filename: "[name].bundle.[contenthash:6].js",
@@ -94,23 +93,10 @@ module.exports = (env, options) => {
                 },
                 { test: /\.json$/, loader: "json" },
                 {
-                    test: /\.js$/,
+                    test: /\.tsx?$/,
+                    use: "ts-loader", 
                     exclude: /node_modules\/(?!(@huth)\/).*/,
-                    use: {
-                        loader: "babel-loader",
-                        options: {
-                            presets: [
-                                [
-                                    "@babel/preset-env", {
-                                        targets: {
-                                            browsers: browserslist
-                                        }
-                                    }
-                                ]
-                            ]
-                        },
-                    },
-                },
+                }, 
                 {
                     test: /\.scss$/,
                     use: [
@@ -133,7 +119,7 @@ module.exports = (env, options) => {
             ]
         },
         resolve: {
-            extensions: [".js"]
+            extensions: [".ts", ".js", ".tsx"]
         },
         plugins,
     }

@@ -3,11 +3,12 @@ import Camera from "./components/Camera"
 import { EffectComposer } from "@react-three/postprocessing"
 import { Suspense, useRef } from "react"
 import { useFrame } from "@react-three/fiber"
+import type { Mesh } from "three"
 
 export default function App() {
-    let boxRef = useRef()
+    const boxRef = useRef<Mesh>(null)
 
-    useFrame(({ clock }) => { 
+    useFrame(({ clock }) => {
         if (boxRef.current) {
             boxRef.current.position.y = Math.cos(clock.getElapsedTime() * 5) * .15
             boxRef.current.rotation.y += .025
@@ -26,11 +27,13 @@ export default function App() {
             <ambientLight intensity={.5} />
 
             <mesh ref={boxRef}>
-                <boxBufferGeometry args={[1, 1, 1]} />
+                <boxGeometry args={[1, 1, 1]} />
                 <meshLambertMaterial />
             </mesh>
 
-            <EffectComposer />
+            <EffectComposer>
+                {/* nothing */}
+            </EffectComposer>
         </Suspense>
     )
 }

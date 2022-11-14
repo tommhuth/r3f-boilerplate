@@ -8,6 +8,8 @@ import { precacheAndRoute, createHandlerBoundToURL } from "workbox-precaching"
 skipWaiting()
 clientsClaim()
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 precacheAndRoute(self.__WB_MANIFEST)
 
 // Cache the Google Fonts stylesheets with a stale-while-revalidate strategy.
