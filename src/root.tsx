@@ -1,31 +1,18 @@
-import "../assets/styles/app.scss"
-
-import { Canvas } from "@react-three/fiber"
 import { createRoot } from "react-dom/client"
+import { registerSW } from "virtual:pwa-register"
+import { lazy } from "react"
 
-import App from "./App"
- 
-createRoot(document.getElementById("canvas")).render((
-    <Canvas
-        gl={{
-            antialias: false,
-            depth: true,
-            stencil: false,
-            alpha: true
-        }}
-        style={{
-            width: "100%",
-            left: 0,
-            top: 0,
-            right: 0,
-            bottom: 0,
-            height: "100%",
-            position: "fixed",
-        }}
-        orthographic
-        camera={{ zoom: 80 }}
-        dpr={[1, window.devicePixelRatio * .75]}
-    >
-        <App />
-    </Canvas>
-))
+const App = lazy(() => import("./App"))
+const root = createRoot(document.getElementById("canvas") as Element)
+
+root.render(<App />)
+
+let updateSW = registerSW({
+    onNeedRefresh() {
+        console.log("New services worker ready")
+        updateSW(true)
+    },
+    onOfflineReady() {
+        alert("Ready to work offline")
+    },
+})

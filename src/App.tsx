@@ -1,39 +1,60 @@
-
 import Camera from "./components/Camera"
-import { EffectComposer } from "@react-three/postprocessing"
-import { Suspense, useRef } from "react"
-import { useFrame } from "@react-three/fiber"
-import type { Mesh } from "three"
+import { Canvas } from "@react-three/fiber"
+import {
+    NoToneMapping,
+    VSMShadowMap,
+} from "three"
+import { Perf } from "r3f-perf"
+import Config from "./data/Config"
 
-export default function App() {
-    const boxRef = useRef<Mesh>(null)
-
-    useFrame(({ clock }) => {
-        if (boxRef.current) {
-            boxRef.current.position.y = Math.cos(clock.getElapsedTime() * 5) * .15
-            boxRef.current.rotation.y += .025
-        }
-    })
+export default function Wrapper() {
 
     return (
-        <Suspense fallback={null}>
-            <Camera />
+        <>
+            <Canvas
+                gl={{
+                    antialias: false,
+                    depth: true,
+                    stencil: false,
+                    alpha: false,
+                    powerPreference: "high-performance",
+                    toneMapping: NoToneMapping,
+                }}
+                style={{
+                    left: 0,
+                    top: 0,
+                    position: "fixed",
+                }}
+                shadows={{
+                    type: VSMShadowMap,
+                }}
+                orthographic
+                camera={{
+                    zoom: 140,
+                    near: 1,
+                    far: 150,
+                }}
+                dpr={window.devicePixelRatio}
+            >
+                <Camera />
 
-            <directionalLight
-                color={0xffffff}
-                position={[6, 12, 10]}
-                intensity={1}
-            />
-            <ambientLight intensity={.5} />
+                <mesh>
+                    <boxGeometry />
+                    <meshPhongMaterial color={"white"} />
+                </mesh>
 
-            <mesh ref={boxRef}>
-                <boxGeometry args={[1, 1, 1]} />
-                <meshLambertMaterial />
-            </mesh>
+                <directionalLight
+                    position={[10, 5, 6]}
+                />
+                <ambientLight intensity={.5} />
 
-            <EffectComposer>
-                {/* nothing */}
-            </EffectComposer>
-        </Suspense>
+                {Config.STATS && (
+                    <Perf
+                        deepAnalyze
+                        style={{ zIndex: 90000 }}
+                    />
+                )}
+            </Canvas>
+        </>
     )
-}
+} 

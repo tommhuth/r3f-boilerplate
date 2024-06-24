@@ -2,10 +2,10 @@ import { GSSolver, SplitSolver, World, Body as CannonBody, Vec3, SAPBroadphase, 
 import React, { useRef, useEffect, useContext, useMemo, useLayoutEffect, ReactNode } from "react"
 import { invalidate, useFrame, useThree } from "@react-three/fiber"
 import { Mesh, InstancedMesh } from "three"
-import { Tuple3, Tuple4 } from "../types"
 import { ndelta, setMatrixAt } from "./utils"
 import createCannonDebugger from "cannon-es-debugger"
-import useAnimationFrame from "use-animation-frame"
+import { Tuple3, Tuple4 } from "src/types.global"
+import { useAnimationFrame } from "./hooks"
 
 export type ShapeDefinition = Shape | [Shape, Vec3?, CannonQuaternion?][]
 
@@ -93,8 +93,6 @@ function useCannonBody({
     return [body, world] as const
 }
 
-
-
 interface CannonProviderProps {
     allowSleep?: boolean
     gravity?: Tuple3
@@ -105,14 +103,13 @@ interface CannonProviderProps {
     children: ReactNode
 }
 
-
 export function CannonProvider({
     children,
     allowSleep = true,
-    gravity: [gravityX, gravityY, gravityZ] = [0, -20, 0],
-    defaultRestitution = .45,
+    gravity: [gravityX, gravityY, gravityZ] = [0, -10, 0],
+    defaultRestitution = .4,
     axisIndex,
-    iterations = 16,
+    iterations = 12,
     debug = false,
 }: CannonProviderProps) {
     const { scene } = useThree()
@@ -135,9 +132,7 @@ export function CannonProvider({
         world.defaultContactMaterial.restitution = defaultRestitution
     }, [world, axisIndex, defaultRestitution])
 
-    // dont use useFrame here since r3f will stop firing those unless invalidate()
-    // and we need to constantly watch over any hasActiveBodies
-    useAnimationFrame(({ delta }) => {
+    useAnimationFrame((delta) => {
         world.step(ndelta(delta))
 
         if (world.hasActiveBodies) {
@@ -147,7 +142,7 @@ export function CannonProvider({
                 cannonDebugger.update()
             }
         }
-    }, [world, cannonDebugger])
+    })
 
     return (
         <context.Provider value={world}>

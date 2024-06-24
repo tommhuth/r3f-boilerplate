@@ -9,15 +9,18 @@
     outline: none;
     text-decoration: none;
     list-style: none; 
+    user-select: none;
+    -webkit-touch-callout: none;
     background-color: transparent;
-    -webkit-tap-highlight-color: rgba(255, 255, 255, 0) !important;
-    appearance: none; 
+    -webkit-tap-highlight-color: rgba(255, 255, 255, 0) !important; 
+    touch-action: none;   
+    -webkit-user-select: none;
 }  
 
 html, 
 body {
-    height: 100vh;
-    overflow: hidden;
+    height: 100vh; 
+    overflow: hidden; 
     background-color: var(--background-color);
 }
 
@@ -32,12 +35,3 @@ body {
     border: 0;
 } 
  
-#root { 
-    top: 0; 
-    position: fixed;
-    display: block;
-    height: 100vh !important; 
-    width: 100% !important;
-    right: 0;
-    left: 0;
-}
