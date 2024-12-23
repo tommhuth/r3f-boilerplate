@@ -14,7 +14,8 @@
         },
         "types": [
             "vite-plugin-pwa/client",
-            "@react-three/fiber"
+            "@react-three/fiber",
+            "node"
         ],
         "target": "ES2022",
         "useDefineForClassFields": true,
