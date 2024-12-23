@@ -2,7 +2,7 @@ import { useThree } from "@react-three/fiber"
 import { useLayoutEffect } from "react"
 
 export default function Camera() {
-    let { camera } = useThree()
+    const { camera } = useThree()
 
     useLayoutEffect(() => {
         camera.position.set(10, 10, 10)

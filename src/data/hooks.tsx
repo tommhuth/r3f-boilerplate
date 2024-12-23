@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef } from "react"
-import { IUniform, Shader } from "three"
+import { IUniform, Renderer, WebGLProgramParametersWithUniforms } from "three"
 import { glsl } from "./utils"
 import random from "@huth/random"
 
@@ -26,20 +26,38 @@ export const useAnimationFrame = (callback: (delta: number) => void) => {
     }, []) // Make sure the effect runs only once
 }
 
-interface ShaderPart {
+
+export interface ShaderPart {
     head?: string
     main?: string
 }
 
-export interface UseShaderParams<T = Record<string, IUniform<any>>> {
-    uniforms?: T
+type UniformsRecord = Record<string, IUniform>
+
+type ReturnUniformsRecord<T extends Record<string, IUniform> | undefined> = T extends UniformsRecord
+    ? {
+        [K in keyof T]: {
+            value: T[K]["value"];
+            needsUpdate?: boolean;
+        };
+    }
+    : undefined;
+
+export interface UseShaderParams<T extends UniformsRecord> {
+    uniforms?: T | undefined
     shared?: string
     vertex?: ShaderPart
     fragment?: ShaderPart
 }
 
-export function useShader({
-    uniforms: incomingUniforms = {},
+interface ReturnUseShader<T extends UniformsRecord | undefined> {
+    uniforms: ReturnUniformsRecord<T>
+    onBeforeCompile: (shader: WebGLProgramParametersWithUniforms, renderer: Renderer) => void
+    customProgramCacheKey: () => string
+}
+
+export function useShader<T extends UniformsRecord>({
+    uniforms: incomingUniforms,
     shared = "",
     vertex = {
         head: "",
@@ -49,15 +67,13 @@ export function useShader({
         head: "",
         main: "",
     }
-}: UseShaderParams) {
-    let uniforms = useMemo(() => {
-        return Object.entries(incomingUniforms)
-            .map(([key, value]) => ({ [key]: { needsUpdate: true, ...value } }))
-            .reduce((previous, current) => ({ ...previous, ...current }), {})
+}: UseShaderParams<T>): ReturnUseShader<T> {
+    const uniforms = useMemo(() => {
+        return incomingUniforms || {}
     }, [])
-    let id = useMemo(() => random.id(), [])
-    let customProgramCacheKey = useCallback(() => id, [id])
-    let onBeforeCompile = useCallback((shader: Shader) => {
+    const id = useMemo(() => random.id(), [])
+    const customProgramCacheKey = useCallback(() => id, [id])
+    const onBeforeCompile = useCallback((shader: WebGLProgramParametersWithUniforms) => {
         shader.uniforms = {
             ...shader.uniforms,
             ...uniforms
@@ -88,7 +104,8 @@ export function useShader({
     }, [vertex?.head, vertex?.main, fragment?.head, fragment?.main])
 
     return {
-        uniforms,
+        // aaah why is this cast neccessary ts
+        uniforms: uniforms as ReturnUniformsRecord<T>,
         customProgramCacheKey,
         onBeforeCompile
     }

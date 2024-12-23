@@ -1,25 +1,24 @@
-import { GSSolver, SplitSolver, World, Body as CannonBody, Vec3, SAPBroadphase, Shape, Quaternion as CannonQuaternion, ContactEquation } from "cannon-es"
+import { GSSolver, SplitSolver, World, Body as CannonBody, Vec3, Shape, Quaternion as CannonQuaternion, ContactEquation, Quaternion, SAPBroadphase } from "cannon-es"
 import React, { useRef, useEffect, useContext, useMemo, useLayoutEffect, ReactNode } from "react"
 import { invalidate, useFrame, useThree } from "@react-three/fiber"
 import { Mesh, InstancedMesh } from "three"
-import { ndelta, setMatrixAt } from "./utils"
+import { setMatrixAt, setMatrixNullAt } from "./utils"
 import createCannonDebugger from "cannon-es-debugger"
-import { Tuple3, Tuple4 } from "src/types.global"
-import { useAnimationFrame } from "./hooks"
+import useAnimationFrame from "use-animation-frame"  
+import { Tuple3 } from "src/types/global"
 
 export type ShapeDefinition = Shape | [Shape, Vec3?, CannonQuaternion?][]
 
-interface BodyParams {
+interface BaseBodyOptions<T = unknown> {
     definition: ShapeDefinition
-    mass?: number
+    mass: number
     velocity?: Tuple3
     position?: Tuple3
     rotation?: Tuple3
     angularDamping?: number
     linearDamping?: number
-    allowSleep?: boolean
     ready?: boolean
-    userData?: Record<string, any>
+    userData?: Record<string, T>
 }
 
 const context = React.createContext(null as unknown as World)
@@ -27,66 +26,63 @@ const context = React.createContext(null as unknown as World)
 export type CollisionEvent = { body: Body, target: Body, contact: ContactEquation }
 
 
-export class Body extends CannonBody {
-    userData: Record<string, any> = {}
+export class Body<T = unknown> extends CannonBody {
+    userData: Record<string, T> = {}
 }
 
 export function useCannonWorld() {
     return useContext(context)
 }
 
+export const DEFAULT_RESTITUTION = .5
+export const DEFAULT_ITERATIONS = 10
+export const DEFAULT_GRAVITY: Tuple3 = [0, -20, 0]
+
 function useCannonBody({
     definition,
-    mass = 0,
-    position: [positionX, positionY, positionZ] = [0, 0, 0],
-    rotation: [rotationX, rotationY, rotationZ] = [0, 0, 0],
-    linearDamping = .75,
-    angularDamping = .35,
-    allowSleep = true,
+    mass,
+    position = [0, 0, 0],
+    rotation = [0, 0, 0],
+    linearDamping,
+    angularDamping,
+    velocity = [0, 0, 0],
     userData = {},
     ready,
-}: BodyParams) {
+}: BaseBodyOptions) {
     const body = useMemo(() => {
-        let body = new Body({
+        const body = new Body({
             mass,
-            allowSleep,
-            sleepSpeedLimit: .25,
+            allowSleep: true,
+            sleepSpeedLimit: .1,
+            position: new Vec3(...position),
+            velocity: new Vec3(...velocity),
+            shape: !Array.isArray(definition) ? definition : undefined,
+            quaternion: new Quaternion().setFromEuler(...rotation),
             angularDamping,
             linearDamping,
-            position: new Vec3(positionX, positionY, positionZ)
         })
-
-        body.userData = userData
 
         if (Array.isArray(definition)) {
             for (const shapeDefinition of definition) {
                 body.addShape(...shapeDefinition)
             }
-        } else {
-            body.addShape(definition)
         }
 
         return body
-    }, [linearDamping, allowSleep, mass, positionX, positionY, positionZ, definition])
+    }, [mass, definition])
     const world = useCannonWorld()
 
     useEffect(() => {
         body.userData = userData
     }, [userData, body])
 
-    useLayoutEffect(() => {
-        body.quaternion.setFromEuler(rotationX, rotationY, rotationZ)
-    }, [body, rotationX, rotationY, rotationZ])
-
     useEffect(() => {
-        if (!ready) {
-            return
-        }
+        if (ready) {
+            world.addBody(body)
 
-        world.addBody(body)
-
-        return () => {
-            world.removeBody(body)
+            return () => {
+                world.removeBody(body)
+            }
         }
     }, [body, world, ready])
 
@@ -94,10 +90,8 @@ function useCannonBody({
 }
 
 interface CannonProviderProps {
-    allowSleep?: boolean
     gravity?: Tuple3
     defaultRestitution?: number
-    axisIndex?: SAPBroadphase["axisIndex"]
     iterations?: number
     debug?: boolean
     children: ReactNode
@@ -105,35 +99,39 @@ interface CannonProviderProps {
 
 export function CannonProvider({
     children,
-    allowSleep = true,
-    gravity: [gravityX, gravityY, gravityZ] = [0, -10, 0],
-    defaultRestitution = .4,
-    axisIndex,
-    iterations = 12,
+    gravity = DEFAULT_GRAVITY,
+    defaultRestitution = DEFAULT_RESTITUTION,
+    iterations = DEFAULT_ITERATIONS,
     debug = false,
 }: CannonProviderProps) {
     const { scene } = useThree()
     const world = useMemo(() => {
-        let solver = new SplitSolver(new GSSolver())
+        const solver = new SplitSolver(new GSSolver())
 
         solver.iterations = iterations
 
-        return new World({
-            allowSleep,
+        const world = new World({
             solver,
-            gravity: new Vec3(gravityX, gravityY, gravityZ),
+            allowSleep: true,
+            gravity: new Vec3(...gravity),
         })
-    }, [allowSleep, iterations, gravityX, gravityY, gravityZ])
+
+        world.broadphase = new SAPBroadphase(world)
+        world.defaultContactMaterial.restitution = defaultRestitution
+
+        return world
+    }, [iterations, ...gravity])
     const cannonDebugger = useMemo(() => {
         return debug ? createCannonDebugger(scene, world, { color: "red" }) : null
     }, [world, scene, debug])
 
-    useEffect(() => {
-        world.defaultContactMaterial.restitution = defaultRestitution
-    }, [world, axisIndex, defaultRestitution])
+    // dont use useFrame here since r3f will stop firing those   
+    // and we need to constantly watch over any hasActiveBodies
+    useAnimationFrame(({ delta }) => {
+        // max 15fps as delta
+        const dt = Math.min(delta, 1 / 15)
 
-    useAnimationFrame((delta) => {
-        world.step(ndelta(delta))
+        world.step(dt)
 
         if (world.hasActiveBodies) {
             invalidate()
@@ -151,82 +149,57 @@ export function CannonProvider({
     )
 }
 
-export function useBody({
-    mass = 1,
-    position: [positionX, positionY, positionZ] = [0, 0, 0],
-    rotation: [rotationX, rotationY, rotationZ] = [0, 0, 0],
-    definition,
-    linearDamping = .1,
-    allowSleep = true,
-}: BodyParams) {
+export function useBody({ mass, ...rest }: BaseBodyOptions) {
     const ref = useRef<Mesh>(null)
-    const [body] = useCannonBody({
-        mass,
-        definition,
-        position: [positionX, positionY, positionZ],
-        rotation: [rotationX, rotationY, rotationZ],
-        linearDamping,
-        allowSleep
-    })
+    const [body] = useCannonBody({ mass, ...rest })
 
     useLayoutEffect(() => {
         if (ref.current) {
-            ref.current.position.set(...body.position.toArray())
-            ref.current.quaternion.set(...body.quaternion.toArray())
+            ref.current.position.copy(body.position)
+            ref.current.quaternion.copy(body.quaternion)
         }
     }, [])
 
     useFrame(() => {
         if (ref.current && mass > 0) {
-            ref.current.position.set(...body.position.toArray())
-            ref.current.quaternion.set(...body.quaternion.toArray())
+            ref.current.position.copy(body.position)
+            ref.current.quaternion.copy(body.quaternion)
         }
     })
 
     return [ref, body] as const
 }
 
-interface UseInstancedBodyParams extends BodyParams {
+interface UseInstancedBodyParams extends BaseBodyOptions {
     instance: InstancedMesh
     index: number | null
     keepAround?: boolean
-    fixed?: boolean
-    scale?: Tuple3 | Tuple4
+    scale?: Tuple3 | number
 }
 
 export function useInstancedBody({
-    mass = 0,
-    position: [positionX, positionY, positionZ] = [0, 0, 0],
-    rotation: [rotationX, rotationY, rotationZ] = [0, 0, 0],
-    definition,
+    mass,
+    position,
+    rotation,
     keepAround = false,
-    fixed = mass === 0,
     ready = true,
-    scale: [scaleX, scaleY, scaleZ] = [1, 1, 1],
+    scale = [1, 1, 1],
     instance,
     index,
-    userData,
-    linearDamping = .1,
+    ...rest
 }: UseInstancedBodyParams) {
-    let [body] = useCannonBody({
+    const [body] = useCannonBody({
         mass,
-        definition,
-        position: [positionX, positionY, positionZ],
-        rotation: [rotationX, rotationY, rotationZ],
-        linearDamping,
-        userData,
+        position,
+        rotation,
         ready,
+        ...rest,
     })
 
     useEffect(() => {
         if (instance && typeof index === "number" && !keepAround) {
             return () => {
-                setMatrixAt({
-                    index,
-                    instance,
-                    position: [-1000000, -1000000, -1000000],
-                    scale: [0, 0, 0]
-                })
+                setMatrixNullAt(instance, index)
             }
         }
     }, [instance, keepAround, index])
@@ -236,21 +209,21 @@ export function useInstancedBody({
             setMatrixAt({
                 index,
                 instance,
-                position: [positionX, positionY, positionZ],
-                rotation: [rotationX, rotationY, rotationZ],
-                scale: [scaleX, scaleY, scaleZ]
+                position,
+                rotation,
+                scale,
             })
         }
-    }, [index, ready, instance, scaleX, scaleY, scaleZ])
+    }, [index, ready, instance])
 
     useFrame(() => {
-        if (instance && typeof index === "number" && !fixed && ready) {
+        if (instance && typeof index === "number" && mass > 0 && ready) {
             setMatrixAt({
                 index,
                 instance,
                 position: body.position.toArray(),
                 rotation: body.quaternion.toArray(),
-                scale: [scaleX, scaleY, scaleZ]
+                scale
             })
         }
     })

@@ -1,4 +1,4 @@
-import { Tuple3 } from "src/types.global"
+import { Tuple3 } from "src/types/global"
 
 export interface Client {
     position: Tuple3
@@ -49,8 +49,8 @@ export class SpatialHashGrid3D {
         for (let x = min[0]; x <= max[0]; x++) {
             for (let y = min[1]; y <= max[1]; y++) {
                 for (let z = min[2]; z <= max[2]; z++) {
-                    let key = this.getHashKey(x, y, z)
-                    let cell = this.grid.get(key)
+                    const key = this.getHashKey(x, y, z)
+                    const cell = this.grid.get(key)
 
                     if (cell) {
                         cell.push(client)
@@ -63,17 +63,17 @@ export class SpatialHashGrid3D {
     }
 
     public findNear(position: Tuple3, size: Tuple3) {
-        let [min, max] = this.getCellBounds(position, size)
-        let result: Client[] = []
+        const [min, max] = this.getCellBounds(position, size)
+        const result: Client[] = []
 
         for (let x = min[0]; x <= max[0]; x++) {
             for (let y = min[1]; y <= max[1]; y++) {
                 for (let z = min[2]; z <= max[2]; z++) {
-                    let key = this.getHashKey(x, y, z)
-                    let cell = this.grid.get(key)
+                    const key = this.getHashKey(x, y, z)
+                    const cell = this.grid.get(key)
 
                     if (cell) {
-                        for (let client of cell) {
+                        for (const client of cell) {
                             if (!result.includes(client)) {
                                 result.push(client)
                             }
@@ -87,7 +87,7 @@ export class SpatialHashGrid3D {
     }
 
     public createClient(position: Tuple3, size: Tuple3, data: ClientData) {
-        let client = {
+        const client = {
             position,
             size,
             data,
@@ -104,13 +104,17 @@ export class SpatialHashGrid3D {
         for (let x = client.min[0]; x <= client.max[0]; x++) {
             for (let y = client.min[1]; y <= client.max[1]; y++) {
                 for (let z = client.min[2]; z <= client.max[2]; z++) {
-                    let key = this.getHashKey(x, y, z)
-                    let cell = this.grid.get(key)
+                    const key = this.getHashKey(x, y, z)
+                    const cell = this.grid.get(key)
 
                     if (cell) {
-                        let cellUpdated = cell.filter(i => i !== client)
+                        const cellUpdated = cell.filter(i => i !== client)
 
-                        cellUpdated.length === 0 ? this.grid.delete(key) : this.grid.set(key, cellUpdated)
+                        if (cellUpdated.length === 0) {
+                            this.grid.delete(key)
+                        } else {
+                            this.grid.set(key, cellUpdated)
+                        }
                     }
                 }
             }

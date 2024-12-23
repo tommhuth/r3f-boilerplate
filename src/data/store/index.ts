@@ -2,11 +2,13 @@ import { create } from "zustand"
 import { subscribeWithSelector } from "zustand/middleware"
 
 interface Store {
-
+    state: string
 }
 
 const store = create(
-    subscribeWithSelector<Store>(() => ({}))
+    subscribeWithSelector<Store>(() => ({
+        state: "hello"
+    }))
 )
 const useStore = store
 

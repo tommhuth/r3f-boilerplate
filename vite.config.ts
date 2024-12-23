@@ -9,6 +9,9 @@ export default defineConfig({
     server: {
         port: 3000,
     },
+    workbox: {
+        globPatterns: ["**/*.{html,js,css,png,svg,woff,woff2,glb}"]
+    },
     assetsInclude: ["**/*.glb"],
     resolve: {
         alias: {
@@ -21,8 +24,7 @@ export default defineConfig({
         react(),
         glsl(),
         VitePWA({
-            registerType: "prompt", 
-            includeAssets: ["fonts/*.woff", "**/*.glb", "textures/*.png"],
+            registerType: "prompt",  
             manifest: {
                 name: "Zax",
                 short_name: "Zax",

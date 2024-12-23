@@ -1,6 +1,6 @@
-@import "global.scss";
-@import "variables.scss";
-@import "typography.scss";
+@use "global.scss";
+@use "variables.scss";
+@use "typography.scss";
 
 #root,
 canvas {

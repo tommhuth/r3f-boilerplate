@@ -7,7 +7,7 @@ const root = createRoot(document.getElementById("canvas") as Element)
 
 root.render(<App />)
 
-let updateSW = registerSW({
+const updateSW = registerSW({
     onNeedRefresh() {
         console.log("New services worker ready")
         updateSW(true)

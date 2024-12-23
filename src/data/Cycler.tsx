@@ -18,7 +18,7 @@ export default class Cycler<T> {
     }
     next() {
         if (!this.lastWasRandom) {
-            let doRandom = random.boolean(this.randomPickChance)
+            const doRandom = random.boolean(this.randomPickChance)
 
             this.lastWasRandom = doRandom
 

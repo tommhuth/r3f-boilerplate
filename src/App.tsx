@@ -7,11 +7,10 @@ import {
 import { Perf } from "r3f-perf"
 import Config from "./data/Config"
 
-export default function Wrapper() {
-
+export default function App() {
     return (
-        <>
-            <Canvas
+        <> 
+            <Canvas 
                 gl={{
                     antialias: false,
                     depth: true,
@@ -50,7 +49,7 @@ export default function Wrapper() {
 
                 {Config.STATS && (
                     <Perf
-                        deepAnalyze
+                        deepAnalyze 
                         style={{ zIndex: 90000 }}
                     />
                 )}

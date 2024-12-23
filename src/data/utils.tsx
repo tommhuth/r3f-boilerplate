@@ -1,17 +1,17 @@
+import { Tuple2, Tuple3, Tuple4 } from "src/types/global"
 import { BufferAttribute, BufferGeometry, Color, ColorRepresentation, Euler, InstancedMesh, Matrix4, Quaternion, Vector3 } from "three"
-import { Tuple2, Tuple3, Tuple4 } from "../types.global"
 import { clamp, mapLinear as map } from "three/src/math/MathUtils.js"
 
 export { clamp, map }
 
 export function ndelta(delta: number) {
-    let nDelta = clamp(delta, 0, 1 / 30)
+    const nDelta = clamp(delta, 0, 1 / 30)
 
     return nDelta
 }
 
 export function glsl(strings: TemplateStringsArray, ...variables) {
-    let str: string[] = []
+    const str: string[] = []
 
     strings.forEach((x, i) => {
         str.push(x)
@@ -21,11 +21,11 @@ export function glsl(strings: TemplateStringsArray, ...variables) {
     return str.join("")
 }
 
-let _matrix = new Matrix4()
-let _quaternion = new Quaternion()
-let _position = new Vector3(0, 0, 0)
-let _scale = new Vector3(1, 1, 1)
-let _euler = new Euler()
+const _matrix = new Matrix4()
+const _quaternion = new Quaternion()
+const _position = new Vector3(0, 0, 0)
+const _scale = new Vector3(1, 1, 1)
+const _euler = new Euler()
 
 interface SetMatrixAtParams {
     instance: InstancedMesh
@@ -78,7 +78,7 @@ export function setBufferAttribute(
     value: number | Tuple2 | Tuple3,
     index: number
 ) {
-    let attribute = geometry.getAttribute(name) as BufferAttribute
+    const attribute = geometry.getAttribute(name) as BufferAttribute
 
     attribute.set(Array.isArray(value) ? value : [value], index)
     attribute.needsUpdate = true
