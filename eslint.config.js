@@ -29,6 +29,22 @@ export default [
             "prefer-const": "off",
             // jeez :/ https://github.com/pmndrs/react-three-fiber/discussions/2487#discussioncomment-10642477
             "react/no-unknown-property": "off",
+            "indent": [
+                "error",
+                4,
+                {
+                    "SwitchCase": 1
+                }
+            ],
+            "quotes": [
+                "error",
+                "double"
+            ],
+            "semi": [
+                "error",
+                "never"
+            ],
+
         },
     },
 ];
