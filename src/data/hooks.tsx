@@ -23,7 +23,7 @@ export const useAnimationFrame = (callback: (delta: number) => void) => {
         requestRef.current = requestAnimationFrame(animate)
 
         return () => cancelAnimationFrame(requestRef.current as number)
-    }, []) // Make sure the effect runs only once
+    })  
 }
 
 
