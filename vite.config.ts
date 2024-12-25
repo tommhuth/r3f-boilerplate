@@ -15,13 +15,14 @@ export default defineConfig({
             "@components": path.resolve(__dirname, "src/components"),
             "@data": path.resolve(__dirname, "src/data"),
             "@assets": path.resolve(__dirname, "assets"),
+            "@src": path.resolve(__dirname, "src"),
         },
     },
     plugins: [
         react(),
         glsl(),
         VitePWA({
-            registerType: "prompt",  
+            registerType: "prompt",
             workbox: {
                 globPatterns: ["**/*.{html,js,css,png,svg,woff,woff2,glb}"]
             },
@@ -30,7 +31,7 @@ export default defineConfig({
                 short_name: "R3F Boilerplate",
                 display: "fullscreen",
                 description: "R3F Boilerplate",
-                orientation: "landscape",
+                orientation: "portrait",
                 theme_color: "#000000",
                 icons: [
                     {
