@@ -26,10 +26,10 @@ export default defineConfig({
                 globPatterns: ["**/*.{html,js,css,png,svg,woff,woff2,glb}"]
             },
             manifest: {
-                name: "Zax",
-                short_name: "Zax",
+                name: "R3F Boilerplate",
+                short_name: "R3F Boilerplate",
                 display: "fullscreen",
-                description: "Zax",
+                description: "R3F Boilerplate",
                 orientation: "landscape",
                 theme_color: "#000000",
                 icons: [
