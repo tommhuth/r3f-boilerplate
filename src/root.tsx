@@ -1,18 +1,61 @@
-import { createRoot } from "react-dom/client"
+import { createRoot as createUiRoot } from "react-dom/client"
 import { registerSW } from "virtual:pwa-register"
 import { lazy } from "react"
+import { createRoot, RenderProps } from "@react-three/fiber"
+import Ui from "./ui/Ui"
+import { clamp } from "@data/utils"
 
+function getConfiguration() {
+    return {
+        camera: {
+            zoom: 150,
+            near: -15,
+            far: 150,
+            position: [0, 0, 0],
+        },
+        flat: true,
+        orthographic: true,
+        shadows: false,
+        dpr: clamp(window.devicePixelRatio * .75, 1, 2),
+        size: {
+            width: window.innerWidth,
+            height: window.innerHeight,
+            top: 0,
+            left: 0
+        },
+        gl: {
+            antialias: true,
+            depth: true,
+            stencil: false,
+            alpha: false,
+            powerPreference: "high-performance",
+        },
+    } satisfies RenderProps<HTMLCanvasElement>
+}
+
+async function configure(element: JSX.Element) {
+    await canvasRoot.configure(getConfiguration())
+
+    canvasRoot.render(element)
+}
+
+const canvasRoot = createRoot(document.getElementById("canvas") as HTMLCanvasElement)
+const uiRoot = createUiRoot(document.getElementById("ui") as HTMLDivElement)
 const App = lazy(() => import("./App"))
-const root = createRoot(document.getElementById("canvas") as Element)
 
-root.render(<App />)
+configure(<App />)
+uiRoot.render(<Ui />)
 
-const updateSW = registerSW({
+window.addEventListener("resize", () => {
+    canvasRoot.configure(getConfiguration())
+})
+
+let updateSW = registerSW({
     onNeedRefresh() {
-        console.log("New services worker ready")
+        console.info("New services worker ready")
         updateSW(true)
     },
     onOfflineReady() {
-        alert("Ready to work offline")
+        console.info("Ready to work offline")
     },
-})
+}) 
