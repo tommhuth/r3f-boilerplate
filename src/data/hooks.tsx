@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef } from "react"
-import { IUniform, Renderer, WebGLProgramParametersWithUniforms } from "three"
+import { IUniform, WebGLRenderer, WebGLProgramParametersWithUniforms } from "three"
 import { glsl } from "./utils"
 import random from "@huth/random"
 
 export const useAnimationFrame = (callback: (delta: number) => void) => {
     // Use useRef for mutable variables that we want to persist
     // without triggering a re-render on their change
-    const requestRef = useRef<number>()
-    const previousTimeRef = useRef<number>()
+    const requestRef = useRef<number | undefined>(undefined)
+    const previousTimeRef = useRef<number | undefined>(undefined)
 
     const animate = (time: number) => {
         if (previousTimeRef.current != undefined) {
@@ -52,7 +52,7 @@ export interface UseShaderParams<T extends UniformsRecord> {
 
 interface ReturnUseShader<T extends UniformsRecord | undefined> {
     uniforms: ReturnUniformsRecord<T>
-    onBeforeCompile: (shader: WebGLProgramParametersWithUniforms, renderer: Renderer) => void
+    onBeforeCompile: (shader: WebGLProgramParametersWithUniforms, renderer: WebGLRenderer) => void
     customProgramCacheKey: () => string
 }
 

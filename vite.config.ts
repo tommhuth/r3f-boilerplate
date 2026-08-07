@@ -1,7 +1,8 @@
 import { defineConfig } from "vite"
 import { VitePWA } from "vite-plugin-pwa"
+import tailwindcss from "@tailwindcss/vite"
 import glsl from "vite-plugin-glsl"
-import react from "@vitejs/plugin-react-swc"
+import react from "@vitejs/plugin-react"
 import path from "path"
 
 // https://vitejs.dev/config/
@@ -12,13 +13,14 @@ export default defineConfig({
     assetsInclude: ["**/*.glb"],
     resolve: {
         alias: {
-            "@components": path.resolve(__dirname, "src/components"),
-            "@data": path.resolve(__dirname, "src/data"),
-            "@assets": path.resolve(__dirname, "assets"),
-            "@src": path.resolve(__dirname, "src"),
+            "@components": path.resolve(import.meta.dirname, "src/components"),
+            "@data": path.resolve(import.meta.dirname, "src/data"),
+            "@assets": path.resolve(import.meta.dirname, "assets"),
+            "@src": path.resolve(import.meta.dirname, "src"),
         },
     },
     plugins: [
+        tailwindcss(),
         react(),
         glsl(),
         VitePWA({

@@ -1,6 +1,6 @@
 import { createRoot as createUiRoot } from "react-dom/client"
 import { registerSW } from "virtual:pwa-register"
-import { lazy } from "react"
+import { lazy, type JSX } from "react"
 import { createRoot, RenderProps } from "@react-three/fiber"
 import Ui from "./ui/ui"
 import { clamp } from "@data/utils"
