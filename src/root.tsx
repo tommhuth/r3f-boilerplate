@@ -2,7 +2,7 @@ import { createRoot as createUiRoot } from "react-dom/client"
 import { registerSW } from "virtual:pwa-register"
 import { lazy } from "react"
 import { createRoot, RenderProps } from "@react-three/fiber"
-import Ui from "./ui/Ui"
+import Ui from "./ui/ui"
 import { clamp } from "@data/utils"
 
 function getConfiguration() {
@@ -41,7 +41,7 @@ async function configure(element: JSX.Element) {
 
 const canvasRoot = createRoot(document.getElementById("canvas") as HTMLCanvasElement)
 const uiRoot = createUiRoot(document.getElementById("ui") as HTMLDivElement)
-const App = lazy(() => import("./App"))
+const App = lazy(() => import("./app"))
 
 configure(<App />)
 uiRoot.render(<Ui />)

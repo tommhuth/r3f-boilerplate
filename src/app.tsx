@@ -1,6 +1,6 @@
 import { extend } from "@react-three/fiber"
 import extensions from "./extensions"
-import Camera from "./components/Camera"
+import Camera from "./components/camera"
 
 extend(extensions)
 
