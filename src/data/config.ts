@@ -1,4 +1,6 @@
-export default {
-    DEBUG: window.location.search.includes("debug"),
-    STATS: window.location.search.includes("stats"),
-}
+const config = {
+    debug: window.location.search.toLowerCase().includes("debug"),
+    stats: window.location.search.toLowerCase().includes("stats"),
+} as const
+
+export default config
