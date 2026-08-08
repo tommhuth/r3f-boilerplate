@@ -21,7 +21,7 @@ export default function App() {
             />
             <ambientLight intensity={.5} />
 
-            {config.stats && <Perf position="top-right" />}
+            {config.stats && <Perf position="top-right" deepAnalyze />}
         </>
     )
 } 

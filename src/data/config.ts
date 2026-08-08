@@ -1,6 +1,8 @@
+const search = window.location.search.toLowerCase()
+
 const config = {
-    debug: window.location.search.toLowerCase().includes("debug"),
-    stats: window.location.search.toLowerCase().includes("stats"),
+    debug: search.includes("debug"),
+    stats: search.includes("stats"),
 } as const
 
 export default config
