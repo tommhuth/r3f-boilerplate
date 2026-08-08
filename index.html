@@ -18,8 +18,11 @@
 
 <body class="touch-none overflow-hidden fixed left-0 block top-0 w-full h-full">
     <canvas id="canvas"
-        class="overflow-hidden fixed left-0 block top-0 w-full h-full z-1 transition-opacity duration-300 opacity-0"></canvas>
+        class="overflow-hidden fixed left-0 block top-0 w-full h-full z-1 transition-opacity duration-500 opacity-0"></canvas>
     <div id="ui"></div>
+    <div id="loading" class="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-0">
+        Loading...
+    </div>
     <script>
         if (window.navigator.standalone) {
             document.documentElement.classList.add("standalone")
